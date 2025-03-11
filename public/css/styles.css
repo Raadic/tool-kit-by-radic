@@ -241,4 +241,151 @@ button:hover {
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
+  
+  .markdown-editor-container {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .markdown-editor,
+  .markdown-preview {
+    height: 300px;
+  }
+}
+
+/* Markdown Editor Styles */
+.markdown-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+.markdown-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: var(--border-radius);
+}
+
+.markdown-toolbar button {
+  padding: 8px 12px;
+  background-color: var(--card-background);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius);
+  color: var(--text-color);
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.markdown-toolbar button:hover {
+  background-color: var(--accent-color);
+  border-color: transparent;
+}
+
+.markdown-editor-container {
+  display: flex;
+  height: 500px;
+  gap: 15px;
+}
+
+.markdown-editor,
+.markdown-preview {
+  flex: 1;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.markdown-editor textarea {
+  width: 100%;
+  height: 100%;
+  padding: 15px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius);
+  color: var(--text-color);
+  font-family: 'Courier New', monospace;
+  resize: none;
+  outline: none;
+}
+
+.markdown-preview {
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.markdown-preview h1,
+.markdown-preview h2,
+.markdown-preview h3 {
+  background: linear-gradient(to right, var(--gradient-start), var(--gradient-mid), var(--gradient-end));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.markdown-preview img {
+  max-width: 100%;
+  border-radius: var(--border-radius);
+}
+
+.markdown-preview code {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+}
+
+.markdown-preview pre {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  border-radius: var(--border-radius);
+  overflow-x: auto;
+}
+
+.markdown-preview pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.markdown-preview blockquote {
+  border-left: 3px solid var(--accent-color);
+  padding-left: 15px;
+  margin-left: 0;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.markdown-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.markdown-actions input {
+  flex: 1;
+  padding: 10px 15px;
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-color);
+  outline: none;
+}
+
+.markdown-actions button {
+  padding: 10px 15px;
+  background-color: var(--accent-color);
+  border: none;
+  border-radius: var(--border-radius);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.markdown-actions button:hover {
+  background-color: #4f46e5;
 }

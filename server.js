@@ -61,6 +61,32 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Markdown save endpoint
+app.post('/api/save-markdown', express.json(), (req, res) => {
+  try {
+    if (!req.body.content || !req.body.filename) {
+      return res.status(400).json({ error: 'Missing content or filename' });
+    }
+    
+    const filename = req.body.filename.endsWith('.md') ? req.body.filename : `${req.body.filename}.md`;
+    const filePath = path.join(__dirname, 'downloads', filename);
+    
+    // Ensure the downloads directory exists
+    const downloadsDir = path.join(__dirname, 'downloads');
+    if (!fs.existsSync(downloadsDir)) {
+      fs.mkdirSync(downloadsDir, { recursive: true });
+    }
+    
+    // Write the markdown content to the file
+    fs.writeFileSync(filePath, req.body.content);
+    
+    res.json({ success: true, filePath: filePath });
+  } catch (error) {
+    console.error('Markdown save error:', error);
+    res.status(500).json({ error: 'Failed to save markdown file' });
+  }
+});
+
 // Background removal endpoint
 app.post('/api/remove-background', upload.single('image'), async (req, res) => {
   try {
