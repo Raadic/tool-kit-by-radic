@@ -3,6 +3,7 @@ const path = require('path');
 const multer = require('multer');
 const sharp = require('sharp');
 const fs = require('fs');
+const { spawn } = require('child_process');
 
 const app = express();
 const port = 3000;
@@ -58,6 +59,59 @@ app.post('/api/convert-image', upload.single('image'), async (req, res) => {
 // Serve index.html for all routes to support client-side routing
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Background removal endpoint
+app.post('/api/remove-background', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const inputPath = req.file.path;
+    const outputPath = path.join(__dirname, 'uploads', `bg-removed-${Date.now()}.png`);
+    
+    // Use the Python virtual environment to run rembg
+    const pythonProcess = spawn('./venv/bin/python', [
+      '-c',
+      `
+from rembg import remove
+from PIL import Image
+import sys
+
+input_path = '${inputPath}'
+output_path = '${outputPath}'
+
+input = Image.open(input_path)
+output = remove(input)
+output.save(output_path)
+      `
+    ]);
+
+    pythonProcess.stderr.on('data', (data) => {
+      console.error(`Python stderr: ${data}`);
+    });
+
+    pythonProcess.on('close', (code) => {
+      if (code !== 0) {
+        console.error(`Python process exited with code ${code}`);
+        return res.status(500).json({ error: 'Background removal failed' });
+      }
+      
+      res.download(outputPath, 'bg-removed.png', (err) => {
+        if (err) {
+          console.error('Download error:', err);
+        }
+        
+        // Clean up files after download
+        fs.unlink(req.file.path, () => {});
+        fs.unlink(outputPath, () => {});
+      });
+    });
+  } catch (error) {
+    console.error('Background removal error:', error);
+    res.status(500).json({ error: 'Background removal failed' });
+  }
 });
 
 app.listen(port, () => {

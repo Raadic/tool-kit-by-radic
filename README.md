@@ -9,6 +9,7 @@ A web application that serves as an index for various micro tools for Arch Linux
 - Card-based tool listing
 - Currently includes:
   - Image Converter (convert between PNG, JPG, WEBP, and other formats)
+  - Background Remover (remove backgrounds from images using AI)
 
 ## Requirements
 
@@ -44,6 +45,15 @@ http://localhost:3000
 On Arch Linux, install the required dependencies with:
 ```
 sudo pacman -S imagemagick sharp nodejs npm
+```
+
+### Background Remover
+On Arch Linux, install the required dependencies with:
+```
+sudo pacman -S python python-pip
+python -m venv venv
+source venv/bin/activate
+pip install "rembg[cpu]"
 ```
 
 ## Adding New Tools

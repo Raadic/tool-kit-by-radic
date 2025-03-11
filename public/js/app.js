@@ -46,6 +46,41 @@ document.addEventListener('DOMContentLoaded', () => {
           <code>npm install && npm start</code>
         </div>
       `
+    },
+    {
+      id: 'background-remover',
+      name: 'Background Remover',
+      description: 'Remove backgrounds from images using AI',
+      icon: '✂️',
+      install: 'sudo pacman -S python python-pip && python -m venv venv && source venv/bin/activate && pip install "rembg[cpu]"',
+      template: `
+        <div class="tool-header">
+          <h2 class="gradient-text">Background Remover</h2>
+          <p>Remove backgrounds from images using AI</p>
+        </div>
+        
+        <form id="backgroundRemoverForm">
+          <div class="form-group">
+            <label for="bgImageFile">Select an image file:</label>
+            <input type="file" id="bgImageFile" name="image" accept="image/*" required>
+          </div>
+          
+          <button type="submit" id="removeBtn">Remove Background</button>
+        </form>
+        
+        <div id="bgRemovalSuccess" class="success-message">
+          Background successfully removed! Downloading...
+        </div>
+        
+        <div id="bgLoadingIndicator" class="loading" style="display: none;"></div>
+        
+        <div class="install-info">
+          <h3>Installation on Arch Linux:</h3>
+          <code>sudo pacman -S python python-pip && python -m venv venv && source venv/bin/activate && pip install "rembg[cpu]"</code>
+          <p>After installation, run this app with:</p>
+          <code>npm install && npm start</code>
+        </div>
+      `
     }
     // Additional tools can be added here in the future
   ];
@@ -135,6 +170,53 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
           console.error('Error:', error);
           alert('Image conversion failed. Please try again.');
+        } finally {
+          loadingIndicator.style.display = 'none';
+        }
+      });
+    } else if (tool.id === 'background-remover') {
+      const form = document.getElementById('backgroundRemoverForm');
+      const loadingIndicator = document.getElementById('bgLoadingIndicator');
+      const successMessage = document.getElementById('bgRemovalSuccess');
+      
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        loadingIndicator.style.display = 'flex';
+        
+        try {
+          const response = await fetch('/api/remove-background', {
+            method: 'POST',
+            body: formData
+          });
+          
+          if (!response.ok) {
+            throw new Error('Background removal failed');
+          }
+          
+          // Trigger file download
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = url;
+          a.download = 'bg-removed.png';
+          document.body.appendChild(a);
+          a.click();
+          
+          // Clean up
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+          
+          // Show success message
+          successMessage.style.display = 'block';
+          setTimeout(() => {
+            successMessage.style.display = 'none';
+          }, 3000);
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Background removal failed. Please try again.');
         } finally {
           loadingIndicator.style.display = 'none';
         }
