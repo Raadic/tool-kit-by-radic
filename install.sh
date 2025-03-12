@@ -7,11 +7,11 @@ echo "=== Tool Kit Installer for Arch Linux ==="
 echo "This script will install all required dependencies and set up Tool Kit."
 echo ""
 
-# Check if running as root and re-execute with sudo if needed
+# Check if running as root
 if [ "$EUID" -ne 0 ]; then
-  echo "This script requires root privileges. Restarting with sudo..."
-  exec sudo bash "$0" "$@"
-  exit $?
+  echo "This script requires root privileges."
+  echo "Please run the command with sudo: sudo bash install.sh"
+  exit 1
 fi
 
 # Function to check if a command exists

@@ -21,10 +21,17 @@ A desktop application that serves as an index for various micro tools for Arch L
 
 ### One-Line Installation (Recommended)
 
-You can install Tool Kit with a single command on Arch Linux:
+You can install Tool Kit on Arch Linux using one of these methods:
 
+**Method 1: Download and run the script (recommended)**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Raadic/tool-kit-by-radic/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Raadic/tool-kit-by-radic/master/install.sh -o install.sh
+sudo bash install.sh
+```
+
+**Method 2: Direct pipe to bash (may require manual sudo)**
+```bash
+sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/Raadic/tool-kit-by-radic/master/install.sh)"
 ```
 
 This will install all dependencies, set up the application, and create a desktop shortcut.
