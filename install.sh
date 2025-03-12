@@ -54,27 +54,39 @@ deactivate
 echo "Building the desktop application..."
 npm run package
 
-# Create a desktop entry
-echo "Creating desktop entry..."
-cat > /usr/share/applications/tool-kit.desktop << EOF
+# Wait for the build to complete
+echo "Waiting for build to complete..."
+sleep 5
+
+# Find the AppImage file
+APPIMAGE_PATH=$(find "$INSTALL_DIR/dist" -name "*.AppImage" | head -n 1)
+
+if [ -z "$APPIMAGE_PATH" ]; then
+  echo "Error: AppImage file not found in $INSTALL_DIR/dist"
+  echo "You can still run the application with 'npm run electron' in $INSTALL_DIR"
+else
+  # Create a desktop entry
+  echo "Creating desktop entry..."
+  cat > /usr/share/applications/tool-kit.desktop << EOF
 [Desktop Entry]
 Name=Tool Kit
 Comment=A collection of useful tools
-Exec=/opt/tool-kit/dist/Tool\ Kit-1.0.0.AppImage
+Exec=$APPIMAGE_PATH
 Icon=/opt/tool-kit/public/img/icon.png
 Terminal=false
 Type=Application
 Categories=Utility;
 EOF
 
-# Create a symlink to the AppImage in /usr/local/bin
-echo "Creating executable in /usr/local/bin..."
-ln -sf "$INSTALL_DIR/dist/Tool Kit-1.0.0.AppImage" /usr/local/bin/tool-kit
+  # Create a symlink to the AppImage in /usr/local/bin
+  echo "Creating executable in /usr/local/bin..."
+  ln -sf "$APPIMAGE_PATH" /usr/local/bin/tool-kit
 
-# Set permissions
-echo "Setting permissions..."
-chmod +x "$INSTALL_DIR/dist/Tool Kit-1.0.0.AppImage"
-chmod +x /usr/local/bin/tool-kit
+  # Set permissions
+  echo "Setting permissions..."
+  chmod +x "$APPIMAGE_PATH"
+  chmod +x /usr/local/bin/tool-kit
+fi
 
 echo ""
 echo "=== Installation Complete ==="

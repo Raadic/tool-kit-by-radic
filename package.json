@@ -24,7 +24,8 @@
     "linux": {
       "target": ["pacman", "AppImage"],
       "category": "Utility",
-      "icon": "public/img/icon.png"
+      "icon": "public/img/icon.png",
+      "maintainer": "Radic <radic@example.com>"
     }
   }
 }
