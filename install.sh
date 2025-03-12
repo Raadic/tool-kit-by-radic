@@ -53,18 +53,52 @@ deactivate
 
 # Build the Electron application
 echo "Building the desktop application..."
-npm run package
 
-# Wait for the build to complete
-echo "Waiting for build to complete..."
-sleep 5
+# Create dist directory if it doesn't exist
+mkdir -p "$INSTALL_DIR/dist"
+
+# Run the build command
+npm run build
+
+# If build fails, try the package command
+if [ ! -f "$INSTALL_DIR/dist/"*.AppImage ]; then
+  echo "Trying alternative build method..."
+  npm run package
+  sleep 10
+fi
 
 # Find the AppImage file
 APPIMAGE_PATH=$(find "$INSTALL_DIR/dist" -name "*.AppImage" | head -n 1)
 
 if [ -z "$APPIMAGE_PATH" ]; then
-  echo "Error: AppImage file not found in $INSTALL_DIR/dist"
-  echo "You can still run the application with 'npm run electron' in $INSTALL_DIR"
+  echo "AppImage file not found in $INSTALL_DIR/dist"
+  echo "Setting up fallback method..."
+  
+  # Create a desktop entry for the npm run electron command
+  echo "Creating desktop entry..."
+  cat > /usr/share/applications/tool-kit.desktop << EOF
+[Desktop Entry]
+Name=Tool Kit
+Comment=A collection of useful tools
+Exec=bash -c "cd $INSTALL_DIR && npm run electron"
+Icon=$INSTALL_DIR/public/img/icon.png
+Terminal=false
+Type=Application
+Categories=Utility;
+EOF
+
+  # Create a shell script to run the application
+  echo "Creating executable in /usr/local/bin..."
+  cat > /usr/local/bin/tool-kit << EOF
+#!/bin/bash
+cd $INSTALL_DIR && npm run electron
+EOF
+
+  # Set permissions
+  echo "Setting permissions..."
+  chmod +x /usr/local/bin/tool-kit
+
+  echo "Fallback installation complete. You can run the application with 'tool-kit' or from the application menu."
 else
   # Create a desktop entry
   echo "Creating desktop entry..."
@@ -73,7 +107,7 @@ else
 Name=Tool Kit
 Comment=A collection of useful tools
 Exec=$APPIMAGE_PATH
-Icon=/opt/tool-kit/public/img/icon.png
+Icon=$INSTALL_DIR/public/img/icon.png
 Terminal=false
 Type=Application
 Categories=Utility;
