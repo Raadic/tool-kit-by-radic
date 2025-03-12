@@ -1,6 +1,6 @@
 # Tool Kit
 
-A web application that serves as an index for various micro tools for Arch Linux. The application features a dark, minimal UI with gradient text headings and rounded corners.
+A desktop application that serves as an index for various micro tools for Arch Linux. The application features a dark, minimal UI with gradient text headings and rounded corners.
 
 ## Features
 
@@ -19,26 +19,49 @@ A web application that serves as an index for various micro tools for Arch Linux
 
 ## Installation
 
-1. Clone this repository:
+### One-Line Installation (Recommended)
+
+You can install Tool Kit with a single command on Arch Linux:
+
+```bash
+sudo curl -fsSL https://raw.githubusercontent.com/Raadic/tool-kit-by-radic/master/install.sh | bash
 ```
-git clone <repository-url>
+
+This will install all dependencies, set up the application, and create a desktop shortcut.
+
+### Manual Installation
+
+1. Clone this repository:
+```bash
+git clone https://github.com/Raadic/tool-kit-by-radic.git
 cd Tool\ Kit
 ```
 
 2. Install Node.js dependencies:
-```
+```bash
 npm install
 ```
 
-3. Start the application:
-```
-npm start
+3. Run as a desktop application:
+```bash
+npm run electron
 ```
 
-4. Open your browser and navigate to:
+4. Or run as a web application:
+```bash
+npm start
 ```
-http://localhost:3000
+Then open your browser and navigate to `http://localhost:3000`
+
+### Building the Desktop Application
+
+To build the desktop application as an AppImage or Pacman package:
+
+```bash
+npm run package
 ```
+
+The built packages will be available in the `dist` directory.
 
 ## Tool-specific Dependencies
 
