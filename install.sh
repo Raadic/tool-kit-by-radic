@@ -21,7 +21,7 @@ command_exists() {
 
 # Install required packages
 echo "Installing required packages..."
-pacman -Sy --noconfirm nodejs npm python python-pip imagemagick
+pacman -Sy --noconfirm nodejs npm python python-pip imagemagick icu
 
 # Create installation directory
 INSTALL_DIR="/opt/tool-kit"
@@ -91,6 +91,14 @@ EOF
   echo "Creating executable in /usr/local/bin..."
   cat > /usr/local/bin/tool-kit << EOF
 #!/bin/bash
+
+# Check for missing libraries
+if ! ldd $(which node) | grep -q libicui18n.so; then
+  echo "Error: Missing ICU libraries. Please install them with:"
+  echo "sudo pacman -Sy icu"
+  exit 1
+fi
+
 cd $INSTALL_DIR && npm run electron
 EOF
 
