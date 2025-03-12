@@ -14,6 +14,10 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# Save the original user for later use with npm commands
+ORIGINAL_USER=$(logname || echo ${SUDO_USER})
+ORIGINAL_HOME=$(eval echo ~${ORIGINAL_USER})
+
 # Function to check if a command exists
 command_exists() {
   command -v "$1" >/dev/null 2>&1
@@ -22,6 +26,45 @@ command_exists() {
 # Install required packages
 echo "Installing required packages..."
 pacman -Sy --noconfirm nodejs npm python python-pip imagemagick icu
+
+# Check for Node.js compatibility and set NODE_BIN
+# First try to use the original user's environment
+echo "Checking for Node.js in the original user's environment..."
+
+# Try to detect nvm in the original user's environment
+if [ -d "$ORIGINAL_HOME/.nvm" ] && [ -f "$ORIGINAL_HOME/.nvm/nvm.sh" ]; then
+  echo "NVM detected in user's home directory, checking for compatible Node.js version..."
+  
+  # Find the latest installed Node.js version in nvm
+  NVM_NODE=$(find "$ORIGINAL_HOME/.nvm/versions/node" -maxdepth 1 -type d | sort -Vr | head -n 1)
+  
+  if [ -n "$NVM_NODE" ] && [ -x "$NVM_NODE/bin/node" ]; then
+    NODE_BIN="$NVM_NODE/bin/node"
+    echo "Using NVM-installed Node.js: $($NODE_BIN --version 2>/dev/null || echo 'version check failed')"
+  else
+    echo "No compatible Node.js version found in NVM, trying system Node.js..."
+    if node --version > /dev/null 2>&1; then
+      NODE_BIN="node"
+      echo "Using system Node.js: $(node --version)"
+    else
+      echo "Error: No compatible Node.js version found."
+      echo "Please install Node.js manually or via NVM."
+      echo "You can install NVM with: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash"
+      exit 1
+    fi
+  fi
+else
+  # Try system Node.js
+  if node --version > /dev/null 2>&1; then
+    NODE_BIN="node"
+    echo "Using system Node.js: $(node --version)"
+  else
+    echo "Error: No compatible Node.js version found."
+    echo "Please install Node.js manually or via NVM."
+    echo "You can install NVM with: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash"
+    exit 1
+  fi
+fi
 
 # Create installation directory
 INSTALL_DIR="/opt/tool-kit"
@@ -42,7 +85,11 @@ cd "$INSTALL_DIR" || exit 1
 
 # Install Node.js dependencies
 echo "Installing Node.js dependencies..."
-npm install
+# Get the npm path corresponding to our Node.js version
+NPM_BIN="$(dirname "$NODE_BIN")/npm"
+
+# Run npm as the original user
+su - "$ORIGINAL_USER" -c "cd $INSTALL_DIR && $NPM_BIN install"
 
 # Set up Python virtual environment and install rembg
 echo "Setting up Python environment and installing rembg..."
@@ -57,13 +104,13 @@ echo "Building the desktop application..."
 # Create dist directory if it doesn't exist
 mkdir -p "$INSTALL_DIR/dist"
 
-# Run the build command
-npm run build
+# Run the build command as the original user
+su - "$ORIGINAL_USER" -c "cd $INSTALL_DIR && $NPM_BIN run build"
 
 # If build fails, try the package command
 if [ ! -f "$INSTALL_DIR/dist/"*.AppImage ]; then
   echo "Trying alternative build method..."
-  npm run package
+  su - "$ORIGINAL_USER" -c "cd $INSTALL_DIR && $NPM_BIN run package"
   sleep 10
 fi
 
@@ -80,7 +127,7 @@ if [ -z "$APPIMAGE_PATH" ]; then
 [Desktop Entry]
 Name=Tool Kit
 Comment=A collection of useful tools
-Exec=bash -c "cd $INSTALL_DIR && npm run electron"
+Exec=bash -c "cd $INSTALL_DIR && $(dirname "$NODE_BIN")/npm run electron"
 Icon=$INSTALL_DIR/public/img/icon.png
 Terminal=false
 Type=Application
@@ -92,14 +139,11 @@ EOF
   cat > /usr/local/bin/tool-kit << EOF
 #!/bin/bash
 
-# Check for missing libraries
-if ! ldd $(which node) | grep -q libicui18n.so; then
-  echo "Error: Missing ICU libraries. Please install them with:"
-  echo "sudo pacman -Sy icu"
-  exit 1
-fi
+# Use the compatible Node.js version
+NODE_PATH="$NODE_BIN"
+NPM_PATH="$(dirname "$NODE_BIN")/npm"
 
-cd $INSTALL_DIR && npm run electron
+cd $INSTALL_DIR && "$NPM_PATH" run electron
 EOF
 
   # Set permissions

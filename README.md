@@ -97,6 +97,44 @@ sudo pacman -S nodejs npm
 
 To add new tools to the application, edit the `public/js/app.js` file and add new tool definitions to the `tools` array.
 
+## Troubleshooting
+
+### Node.js ICU Library Compatibility Issues
+
+If you encounter errors related to ICU libraries such as:
+```
+node: error while loading shared libraries: libicui18n.so.76: cannot open shared object file: No such file or directory
+```
+or
+```
+node: symbol lookup error: node: undefined symbol: _ZN6icu_768ByteSink15GetAppendBufferEiiPciPi
+```
+
+This indicates a compatibility issue between the installed Node.js version and your system's ICU libraries. The updated install script should automatically detect and use a compatible Node.js version if available. If you still encounter issues, you can manually install a compatible version using Node Version Manager (nvm):
+
+1. Install Node Version Manager (nvm):
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+```
+
+2. Close and reopen your terminal, or source your profile:
+```bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+```
+
+3. Install a compatible version of Node.js:
+```bash
+nvm install 20.11.1
+```
+
+4. Run the installation script again:
+```bash
+sudo bash install.sh
+```
+
+The install script has been updated to automatically detect and use the nvm-installed Node.js if the system version is incompatible.
+
 ## License
 
 MIT
